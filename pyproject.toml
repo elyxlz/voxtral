@@ -10,6 +10,8 @@ dependencies = [
     "tqdm>=4.66.5",
     "yt-dlp>=2024.9.27",
     "rich>=13.9.2",
+    "torchaudio>=2.4.1",
+    "numpy>=2.1.1",
 ]
 
 [build-system]

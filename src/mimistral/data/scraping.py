@@ -58,6 +58,11 @@ def download_and_chunk_video(
     # Generate a base name for chunks
     base_name = generate_filename(url, 0, config.chunk_duration)
 
+    # Create subdirectory based on the first two letters of the UUID
+    subdir = base_name[:2]
+    output_subdir = os.path.join(config.output_path, subdir)
+    os.makedirs(output_subdir, exist_ok=True)
+
     # Use FFmpeg to chunk the video
     ffmpeg_cmd = [
         "ffmpeg",
@@ -73,7 +78,7 @@ def download_and_chunk_video(
         "1",
         "-map",
         "0",
-        os.path.join(config.output_path, f"{base_name}_%d{file_extension}"),
+        os.path.join(output_subdir, f"{base_name}_%d{file_extension}"),
     ]
 
     try:
@@ -85,10 +90,11 @@ def download_and_chunk_video(
         return 0, 0
 
     # Count the number of chunks created
+    # Count the number of chunks created
     chunks_downloaded = len(
         [
             f
-            for f in os.listdir(config.output_path)
+            for f in os.listdir(output_subdir)
             if f.startswith(base_name) and f.endswith(file_extension)
         ]
     )

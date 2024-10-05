@@ -16,6 +16,8 @@ dependencies = [
   "transformers>=4.45.1",
   "einops>=0.8.0",
   "python-dotenv>=1.0.1",
+  "protobuf>=5.28.2",
+  "sentencepiece>=0.2.0",
 ]
 
 [build-system]

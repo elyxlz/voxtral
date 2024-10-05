@@ -61,12 +61,12 @@ class VoxtralTokenizer(torch.nn.Module):
         self.whisper = TimedWhisperTokenizer(config.whisper_path, hertz=config.text_hz)
 
     def encode(self, x: torch.Tensor, sample_rate: int) -> torch.Tensor:
+        assert x.dim() == 3
+        assert x.size(1) == 1
         assert sample_rate == 24_000
-        x_for_whisper = ta.functional.resample(x, sample_rate, 16_000)
+        x_for_whisper = ta.functional.resample(x, sample_rate, 16_000)[:, 0]
 
-        text_tokens = self.timed_whisper_encoder.forward(
-            x_for_whisper, sample_rate=16_000
-        )
+        text_tokens = self.whisper(x_for_whisper, sample_rate=16_000)
 
         audio_tokens = self.mimi.encode(x)
 
@@ -90,3 +90,5 @@ if __name__ == "__main__":
     print("Encoded shape:", encoded.shape)
 
     # decoded = tokenizer.decode(encoded)
+    #
+    #

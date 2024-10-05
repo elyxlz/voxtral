@@ -40,6 +40,22 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
         **config.mistral_kwargs,
     )
 
+    # Increase vocab size to 2^16
+    new_vocab_size = 2**16
+    old_vocab_size = model.config.vocab_size
+
+    # Resize token embeddings
+    model.resize_token_embeddings(new_vocab_size)
+
+    # Modify the output layer (language model head)
+    old_lm_head = model.lm_head
+    new_lm_head = torch.nn.Linear(model.config.hidden_size, new_vocab_size, bias=False)
+    new_lm_head.weight.data[:old_vocab_size, :] = old_lm_head.weight.data
+    model.lm_head = new_lm_head
+
+    # Update the config
+    model.config.vocab_size = new_vocab_size
+
     # Apply layer pruning if enabled
     if config.prune_layers is not None:
         layers_to_remove = list(

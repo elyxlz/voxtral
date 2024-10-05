@@ -10,7 +10,7 @@ class VoxtralTrainConfig(pyds.BaseSettings):
     name: str = "voxtral-test"
 
     mistral_pretrained_path: str = "nilq/mistral-1L-tiny"  # "mistralai/Mistral-7B-v0.3"
-    mistral_kwargs: dict = {"vocab_size": 2**16}
+    mistral_kwargs: dict = {}
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     lora_rank: int | None = None
     prune_layers: int | None = None  # no layer dropout

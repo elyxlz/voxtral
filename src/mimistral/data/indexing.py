@@ -86,6 +86,13 @@ def format_duration(seconds: int) -> str:
 def index_youtube_urls(config: IndexConfig) -> None:
     rprint("[cyan]Starting YouTube URL indexing process")
 
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(config.output_file), exist_ok=True)
+
+    # Create output file if it doesn't exist
+    if not os.path.exists(config.output_file):
+        open(config.output_file, "a").close()
+
     deduplicate(config.output_file)
 
     # Read existing URLs and deduplicate
@@ -94,6 +101,11 @@ def index_youtube_urls(config: IndexConfig) -> None:
         rprint(f"[yellow]Reading existing URLs from {config.output_file}...")
         with open(config.output_file, "r") as f:
             existing_urls = set(line.strip() for line in f)
+
+    # Ensure input file exists
+    if not os.path.exists(config.input_file):
+        rprint(f"[bold red]Error: Input file {config.input_file} does not exist.")
+        return
 
     rprint(f"[yellow]Reading search terms from {config.input_file}...")
     with open(config.input_file, "r") as f:

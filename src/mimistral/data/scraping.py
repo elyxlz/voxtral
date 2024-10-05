@@ -146,7 +146,9 @@ def scrape_youtube_urls(config: DownloaderConfig) -> None:
             executor.submit(download_and_chunk_video, url, config) for url in urls
         ]
 
-        with tqdm(total=total_urls, desc="Processing URLs", unit="url") as pbar:
+        with tqdm(
+            total=total_urls, desc="Processing URLs", unit="url", colour="yellow"
+        ) as pbar:
             for future in as_completed(futures):
                 chunks_downloaded, duration = future.result()
                 total_chunks += chunks_downloaded

@@ -55,7 +55,7 @@ class VoxtralTokenizer(torch.nn.Module):
 
     @property
     def device(self) -> torch.device:
-        return next(self.parameters()).device
+        return next(self.mimi.parameters()).device
 
     def encode(self, x: torch.Tensor, sample_rate: int) -> torch.Tensor:
         assert x.dim() == 3
@@ -71,6 +71,7 @@ class VoxtralTokenizer(torch.nn.Module):
             torch.arange(0, self.config.mimi_num_quantizers) * mimi_vocab_size
         )
 
+        print(self.device)
         audio_tokens = (
             self.mimi.encode(x.to(self.device))
             + token_offset[None, :, None]

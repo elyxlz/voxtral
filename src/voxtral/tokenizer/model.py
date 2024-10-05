@@ -72,6 +72,7 @@ class VoxtralTokenizer(torch.nn.Module):
         )
 
         print(self.device)
+        breakpoint()
         audio_tokens = (
             self.mimi.encode(x.to(self.device))
             + token_offset[None, :, None]

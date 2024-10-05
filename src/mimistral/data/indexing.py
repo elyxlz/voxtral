@@ -7,7 +7,7 @@ import os
 from rich import print as rprint
 
 
-class IndexConfiguration(typing.NamedTuple):
+class IndexConfig(typing.NamedTuple):
     input_file: str = "./data/searches.txt"
     output_file: str = "./data/urls.txt"
     min_duration: int = 30 * 60
@@ -82,7 +82,7 @@ def format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def index_youtube_urls(config: IndexConfiguration) -> None:
+def index_youtube_urls(config: IndexConfig) -> None:
     rprint("[cyan]Starting YouTube URL indexing process")
 
     deduplicate(config.output_file)
@@ -169,4 +169,4 @@ def index_youtube_urls(config: IndexConfiguration) -> None:
 
 
 if __name__ == "__main__":
-    index_youtube_urls(IndexConfiguration())
+    index_youtube_urls(IndexConfig())

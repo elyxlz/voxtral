@@ -104,7 +104,7 @@ def _save_tokens(encoded_tokens: np.ndarray, filename: str, output_path: str):
     full_output_path = os.path.join(output_path, subdir)
     os.makedirs(full_output_path, exist_ok=True)
     output_file = os.path.join(full_output_path, f"{os.path.splitext(filename)[0]}.npy")
-    np.save(output_file, encoded_tokens)
+    np.save(output_file, encoded_tokens.cpu().numpy())
 
 
 def preprocess_audio_chunks(config: PreprocessingConfig):

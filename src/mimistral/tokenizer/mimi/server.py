@@ -4,26 +4,25 @@
 
 import argparse
 import asyncio
-from dataclasses import dataclass
-import random
 import os
-from pathlib import Path
-import tarfile
-import time
+import random
 import secrets
 import sys
+import tarfile
+import time
+from dataclasses import dataclass
+from pathlib import Path
 
 import aiohttp
-from aiohttp import web
-from huggingface_hub import hf_hub_download
 import numpy as np
 import sentencepiece
 import sphn
 import torch
-
+from aiohttp import web
+from huggingface_hub import hf_hub_download
 
 from .client_utils import make_log
-from .models import loaders, MimiModel, LMModel, LMGen
+from .models import LMGen, LMModel, MimiModel, loaders
 
 
 def log(level: str, msg: str):
@@ -48,8 +47,13 @@ class ServerState:
     lm_gen: LMGen
     lock: asyncio.Lock
 
-    def __init__(self, mimi: MimiModel, text_tokenizer: sentencepiece.SentencePieceProcessor,
-                 lm: LMModel, device: str | torch.device):
+    def __init__(
+        self,
+        mimi: MimiModel,
+        text_tokenizer: sentencepiece.SentencePieceProcessor,
+        lm: LMModel,
+        device: str | torch.device,
+    ):
         self.mimi = mimi
         self.text_tokenizer = text_tokenizer
         self.lm_gen = LMGen(lm)
@@ -63,10 +67,12 @@ class ServerState:
 
     def warmup(self):
         for chunk in range(4):
-            chunk = torch.zeros(1, 1, self.frame_size, dtype=torch.float32, device=self.device)
+            chunk = torch.zeros(
+                1, 1, self.frame_size, dtype=torch.float32, device=self.device
+            )
             codes = self.mimi.encode(chunk)
             for c in range(codes.shape[-1]):
-                tokens = self.lm_gen.step(codes[:, :, c: c + 1])
+                tokens = self.lm_gen.step(codes[:, :, c : c + 1])
                 if tokens is None:
                     continue
                 _ = self.mimi.decode(tokens[:, 1:])
@@ -122,12 +128,12 @@ class ServerState:
                 while all_pcm_data.shape[-1] >= self.frame_size:
                     be = time.time()
                     chunk = all_pcm_data[: self.frame_size]
-                    all_pcm_data = all_pcm_data[self.frame_size:]
+                    all_pcm_data = all_pcm_data[self.frame_size :]
                     chunk = torch.from_numpy(chunk)
                     chunk = chunk.to(device=self.device)[None, None]
                     codes = self.mimi.encode(chunk)
                     for c in range(codes.shape[-1]):
-                        tokens = self.lm_gen.step(codes[:, :, c: c + 1])
+                        tokens = self.lm_gen.step(codes[:, :, c : c + 1])
                         if tokens is None:
                             continue
                         assert tokens.shape[1] == self.lm_gen.lm_model.dep_q + 1
@@ -171,37 +177,57 @@ def main():
     parser.add_argument("--host", default="localhost", type=str)
     parser.add_argument("--port", default=8998, type=int)
     parser.add_argument("--static", type=str)
-    parser.add_argument("--gradio-tunnel", action='store_true', help='Activate a gradio tunnel.')
-    parser.add_argument("--gradio-tunnel-token",
-                        help='Provide a custom (secret) token here to keep getting the same URL.')
+    parser.add_argument(
+        "--gradio-tunnel", action="store_true", help="Activate a gradio tunnel."
+    )
+    parser.add_argument(
+        "--gradio-tunnel-token",
+        help="Provide a custom (secret) token here to keep getting the same URL.",
+    )
 
     parser.add_argument("--tokenizer", type=str, help="Path to a local tokenizer file.")
-    parser.add_argument("--moshi-weight", type=str, help="Path to a local checkpoint file for Moshi.")
-    parser.add_argument("--mimi-weight", type=str, help="Path to a local checkpoint file for Mimi.")
-    parser.add_argument("--hf-repo", type=str, default=loaders.DEFAULT_REPO,
-                        help="HF repo to look into, defaults Moshiko. "
-                             "Use this to select a different pre-trained model.")
-    parser.add_argument("--device", type=str, default="cuda", help="Device on which to run, defaults to 'cuda'.")
+    parser.add_argument(
+        "--moshi-weight", type=str, help="Path to a local checkpoint file for Moshi."
+    )
+    parser.add_argument(
+        "--mimi-weight", type=str, help="Path to a local checkpoint file for Mimi."
+    )
+    parser.add_argument(
+        "--hf-repo",
+        type=str,
+        default=loaders.DEFAULT_REPO,
+        help="HF repo to look into, defaults Moshiko. "
+        "Use this to select a different pre-trained model.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda",
+        help="Device on which to run, defaults to 'cuda'.",
+    )
     parser.add_argument(
         "--ssl",
         type=str,
         help=(
             "use https instead of http, this flag should point to a directory "
             "that contains valid key.pem and cert.pem files"
-        )
+        ),
     )
 
     args = parser.parse_args()
     seed_all(42424242)
 
     setup_tunnel = None
-    tunnel_token = ''
+    tunnel_token = ""
     if args.gradio_tunnel:
         try:
             from gradio import networking  # type: ignore
         except ImportError:
-            log("error", "Cannot find gradio which is required to activate a tunnel. "
-                         "Please install with `pip install gradio`.")
+            log(
+                "error",
+                "Cannot find gradio which is required to activate a tunnel. "
+                "Please install with `pip install gradio`.",
+            )
             sys.exit(1)
         setup_tunnel = networking.setup_tunnel
         if args.gradio_tunnel_token is None:
@@ -244,6 +270,7 @@ def main():
         # When set to the "none" string, we don't serve any static content.
         static_path = args.static
     if static_path is not None:
+
         async def handle_root(_):
             return web.FileResponse(os.path.join(static_path, "index.html"))
 
@@ -265,9 +292,15 @@ def main():
 
     log("info", f"Access the Web UI directly at {protocol}://{args.host}:{args.port}")
     if setup_tunnel is not None:
-        tunnel = setup_tunnel('localhost', args.port, tunnel_token, None)
-        log("info", f"Tunnel started, if executing on a remote GPU, you can use {tunnel}.")
-        log("info", "Note that this tunnel goes through the US and you might experience high latency in Europe.")
+        tunnel = setup_tunnel("localhost", args.port, tunnel_token, None)
+        log(
+            "info",
+            f"Tunnel started, if executing on a remote GPU, you can use {tunnel}.",
+        )
+        log(
+            "info",
+            "Note that this tunnel goes through the US and you might experience high latency in Europe.",
+        )
     web.run_app(app, port=args.port, ssl_context=ssl_context)
 
 

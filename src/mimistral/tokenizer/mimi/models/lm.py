@@ -8,22 +8,21 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from dataclasses import dataclass
-from functools import partial
 import logging
 import typing as tp
+from dataclasses import dataclass
+from functools import partial
 
 import torch
 from torch import nn
 
-from ..utils.sampling import sample_token
-from ..utils.compile import CUDAGraphed
 from ..modules.streaming import StreamingContainer, StreamingModule
 from ..modules.transformer import (
     StreamingTransformer,
     create_norm_fn,
 )
-
+from ..utils.compile import CUDAGraphed
+from ..utils.sampling import sample_token
 
 logger = logging.getLogger(__name__)
 
@@ -372,7 +371,7 @@ class LMGen(StreamingModule[_LMGenState]):
             dtype=torch.long,
         )
 
-        disable = lm_model.device.type != 'cuda'
+        disable = lm_model.device.type != "cuda"
         graphed_main = CUDAGraphed(lm_model.forward_text, disable=disable)
         graphed_depth = CUDAGraphed(self.depformer_step, disable=disable)
 

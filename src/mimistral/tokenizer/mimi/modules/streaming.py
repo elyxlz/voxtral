@@ -13,13 +13,14 @@ Streaming module API that should be implemented by all Streaming components,
 """
 
 import abc
-from contextlib import contextmanager
-from dataclasses import dataclass
 import itertools
 import math
 import typing as tp
-from torch import nn
+from contextlib import contextmanager
+from dataclasses import dataclass
+
 import torch
+from torch import nn
 
 
 class Resetable(tp.Protocol):

@@ -12,8 +12,8 @@
 Base class for all quantizers.
 """
 
-from dataclasses import dataclass, field
 import typing as tp
+from dataclasses import dataclass, field
 
 import torch
 from torch import nn
@@ -68,7 +68,7 @@ class BaseQuantizer(nn.Module):
         raise NotImplementedError()
 
     @property
-    def semantic_quantizer(self) -> 'BaseQuantizer':
+    def semantic_quantizer(self) -> "BaseQuantizer":
         """This returns the quantizer that models the first level of the hierarchy (typically semantic).
 
         In this case, it's the quantizer itself.
@@ -76,7 +76,7 @@ class BaseQuantizer(nn.Module):
         return self
 
     @property
-    def acoustic_quantizer(self) -> 'BaseQuantizer':
+    def acoustic_quantizer(self) -> "BaseQuantizer":
         """This returns the quantizer that models the higher levels of the hierarchy (typically acoustic).
 
         In this case, it's the quantizer itself.

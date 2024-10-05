@@ -8,15 +8,15 @@ to fully deactivate it easily with a context manager.
 Provides a simple activation checkpointing that is compatible with FSDP and torch compile.
 Finally, provides some utilities for CUDA graphing functions.
 """
-from contextlib import contextmanager
-from functools import wraps
+
 import inspect
 import os
 import typing as tp
+from contextlib import contextmanager
+from functools import wraps
 
 import torch
 from torch import cuda
-
 
 _compile_disabled: bool = False
 

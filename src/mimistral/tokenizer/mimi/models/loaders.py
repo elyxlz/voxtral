@@ -2,23 +2,24 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 """Retrieves the pretrained models for Moshi and Mimi."""
+
 from pathlib import Path
 
-from safetensors.torch import load_model
 import torch
+from safetensors.torch import load_model
 
+from ..modules import SEANetDecoder, SEANetEncoder, transformer
+from ..quantization import SplitResidualVectorQuantizer
 from .compression import MimiModel
 from .lm import LMModel
-from ..modules import SEANetEncoder, SEANetDecoder, transformer
-from ..quantization import SplitResidualVectorQuantizer
 
 SAMPLE_RATE = 24000
 FRAME_RATE = 12.5
 
-TEXT_TOKENIZER_NAME = 'tokenizer_spm_32k_3.model'
-MOSHI_NAME = 'model.safetensors'
-MIMI_NAME = 'tokenizer-e351c8d8-checkpoint125.safetensors'
-DEFAULT_REPO = 'kyutai/moshiko-pytorch-bf16'
+TEXT_TOKENIZER_NAME = "tokenizer_spm_32k_3.model"
+MOSHI_NAME = "model.safetensors"
+MIMI_NAME = "tokenizer-e351c8d8-checkpoint125.safetensors"
+DEFAULT_REPO = "kyutai/moshiko-pytorch-bf16"
 
 
 _seanet_kwargs = {
@@ -102,8 +103,7 @@ def _is_safetensors(path: Path | str) -> bool:
     return Path(path).suffix in (".safetensors", ".sft", ".sfts")
 
 
-def get_mimi(filename: str | Path,
-             device: torch.device | str = 'cpu') -> MimiModel:
+def get_mimi(filename: str | Path, device: torch.device | str = "cpu") -> MimiModel:
     """Return a pretrained Mimi model."""
     encoder = SEANetEncoder(**_seanet_kwargs)
     decoder = SEANetDecoder(**_seanet_kwargs)
@@ -139,8 +139,7 @@ def get_mimi(filename: str | Path,
     return model
 
 
-def get_moshi_lm(filename: str | Path,
-                 device: torch.device | str = 'cpu') -> LMModel:
+def get_moshi_lm(filename: str | Path, device: torch.device | str = "cpu") -> LMModel:
     dtype = torch.bfloat16
     model = LMModel(
         device=device,

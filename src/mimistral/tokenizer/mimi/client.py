@@ -10,8 +10,8 @@ import sys
 
 import aiohttp
 import numpy as np
-import sphn
 import sounddevice as sd
+import sphn
 
 from .client_utils import AnyPrinter, Printer, RawPrinter
 
@@ -149,14 +149,17 @@ async def run(printer: AnyPrinter, args):
         uri = f"{proto}://{args.host}:{args.port}/api/chat"
     else:
         proto = "wss"
-        if '://' in args.url:
-            proto, without_proto = args.url.split('://', 1)
-            if proto in ['ws', 'http']:
+        if "://" in args.url:
+            proto, without_proto = args.url.split("://", 1)
+            if proto in ["ws", "http"]:
                 proto = "ws"
-            elif proto in ['wss', 'https']:
+            elif proto in ["wss", "https"]:
                 proto = "wss"
             else:
-                printer.log("error", "The provided URL {args.url} seems to contain a protocol but it is unknown.")
+                printer.log(
+                    "error",
+                    "The provided URL {args.url} seems to contain a protocol but it is unknown.",
+                )
                 sys.exit(1)
         else:
             without_proto = args.url
@@ -173,11 +176,18 @@ async def run(printer: AnyPrinter, args):
 
 def main():
     parser = argparse.ArgumentParser("client_opus")
-    parser.add_argument("--host", default="localhost", type=str, help="Hostname to connect to.")
+    parser.add_argument(
+        "--host", default="localhost", type=str, help="Hostname to connect to."
+    )
     parser.add_argument("--port", default=8998, type=int, help="Port to connect to.")
-    parser.add_argument("--https", action='store_true',
-                        help="Set this flag for using a https connection.")
-    parser.add_argument("--url", type=str, help='Provides directly a URL, e.g. to a gradio tunnel.')
+    parser.add_argument(
+        "--https",
+        action="store_true",
+        help="Set this flag for using a https connection.",
+    )
+    parser.add_argument(
+        "--url", type=str, help="Provides directly a URL, e.g. to a gradio tunnel."
+    )
     args = parser.parse_args()
     printer: AnyPrinter
 

@@ -13,26 +13,24 @@
 for Mimi. Also defines the main interface that a model must follow to be usable as an audio tokenizer.
 """
 
+import logging
+import typing as tp
 from abc import abstractmethod
 from contextlib import nullcontext
 from dataclasses import dataclass
-import logging
-import typing as tp
 
 import torch
 from torch import nn
 
-
-from ..quantization import (
-    QuantizedResult,
-    BaseQuantizer,
-    SplitResidualVectorQuantizer,
-    ResidualVectorQuantizer,
-)
 from ..modules.resample import ConvDownsample1d, ConvTrUpsample1d
-from ..modules.streaming import StreamingModule, State
-from ..utils.compile import no_compile, CUDAGraphed
-
+from ..modules.streaming import State, StreamingModule
+from ..quantization import (
+    BaseQuantizer,
+    QuantizedResult,
+    ResidualVectorQuantizer,
+    SplitResidualVectorQuantizer,
+)
+from ..utils.compile import CUDAGraphed, no_compile
 
 logger = logging.getLogger()
 
@@ -221,7 +219,7 @@ class MimiModel(CompressionModel[_MimiState]):
 
     def _init_streaming_state(self, batch_size: int) -> _MimiState:
         device = next(self.parameters()).device
-        disable = device.type != 'cuda'
+        disable = device.type != "cuda"
         graphed_tr_dec = None
         graphed_tr_enc = None
         if self.encoder_transformer is not None:

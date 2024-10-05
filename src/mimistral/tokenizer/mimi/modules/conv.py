@@ -8,10 +8,10 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
-from dataclasses import dataclass
 import math
 import typing as tp
 import warnings
+from dataclasses import dataclass
 
 import torch
 from torch import nn
@@ -19,7 +19,6 @@ from torch.nn import functional as F
 from torch.nn.utils import weight_norm
 
 from .streaming import RawStreamingConv1d, RawStreamingConvTranspose1d, StreamingModule
-
 
 CONV_NORMALIZATIONS = frozenset(["none", "weight_norm"])
 

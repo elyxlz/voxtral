@@ -1,5 +1,5 @@
 import torchaudio
-from voxtral.tokenizer.model import VoxtralTokenizerConfig, VoxtralTokenizer
+from voxtral.tokenizer.model import VoxtralTokenizer, VoxtralTokenizerConfig
 
 audio_path = "./data/chunks/1e/1ed12ab7-53b6-4d61-9f52-9ddddfb0c32e_169.m4a"
 waveform, sample_rate = torchaudio.load(audio_path)

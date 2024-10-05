@@ -19,6 +19,7 @@ dependencies = [
   "protobuf>=5.28.2",
   "sentencepiece>=0.2.0",
   "pydantic-settings>=2.5.2",
+  "wandb>=0.18.3",
 ]
 
 [build-system]

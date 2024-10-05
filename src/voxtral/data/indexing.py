@@ -2,8 +2,8 @@ import concurrent.futures
 import os
 import time
 from concurrent.futures import TimeoutError
-import pydantic_settings as pyds
 
+import pydantic_settings as pyds
 from rich import print as rprint
 from tqdm import tqdm
 from youtubesearchpython import VideosSearch

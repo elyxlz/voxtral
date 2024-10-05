@@ -1,11 +1,12 @@
+import typing
+
+import dotenv
+import huggingface_hub as hf_hub
 import torch
 import torchaudio as ta
-import huggingface_hub as hf_hub
-import typing
-import dotenv
 
-from .word_level_whisper import TimedWhisperTokenizer
 from .mimi.models import loaders
+from .word_level_whisper import TimedWhisperTokenizer
 
 dotenv.load_dotenv()
 

@@ -1,10 +1,11 @@
-import torch
+import dataclasses
 import re
 import string
-import transformers as tr
-import dataclasses
 import typing
+
 import numpy as np
+import torch
+import transformers as tr
 
 
 @dataclasses.dataclass

@@ -15,11 +15,11 @@ class PreprocessingConfig(typing.NamedTuple):
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     input_path: str = "./data/chunks"
     output_path: str = "./data/tokens"
-    batch_size: int = 32
+    batch_size: int = 8
     num_workers: int = 20
     pin_memory: bool = True
     compile_tokenizer: bool = True  # False
-    max_save_workers: int = 4
+    max_save_workers: int = 16
     use_cuda: bool = torch.cuda.is_available()
     tokenizer_dtype: torch.dtype = torch.float16
     chunk_frames: int = 20 * 24_000  # New parameter for fixed chunk size
@@ -118,7 +118,7 @@ def preprocess_audio_chunks(config: PreprocessingConfig):
         device=device, dtype=config.tokenizer_dtype
     )
     if config.compile_tokenizer:
-        tokenizer: VoxtralTokenizer = torch.compile(tokenizer)  # type: ignore
+        tokenizer: VoxtralTokenizer = torch.compile(tokenizer, mode="reduce-overhead")  # type: ignore
 
     save_executor = ThreadPoolExecutor(max_workers=config.max_save_workers)
 

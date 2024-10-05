@@ -165,6 +165,7 @@ def generate_tokens(
     input_features = processor(
         audio.numpy(), sampling_rate=16000, return_tensors="pt"
     ).input_features.to(audio.device, audio.dtype)
+    print(input_features.device, next(model.parameters()).device)
     return model.generate(
         input_features, return_timestamps=True, return_token_timestamps=True
     )

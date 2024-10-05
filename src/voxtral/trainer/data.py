@@ -28,6 +28,7 @@ def get_item(file_path: str) -> dict[str, torch.Tensor]:
         item: dict[str, torch.Tensor] = {}
         for key, value in npz_data.items():
             item[key] = torch.from_numpy(value)
+            print(item)
             print(item[key].shape)
 
         print(item.keys())

@@ -9,13 +9,13 @@ import torch.utils.data as td
 from .config import VoxtralTrainConfig
 
 
-def get_npz_files(path: str) -> list[str]:
-    npz_files: list[str] = []
+def get_npy_files(path: str) -> list[str]:
+    npy_files: list[str] = []
     for root, _, files in os.walk(path):
         for file in files:
-            if file.endswith(".npz"):
-                npz_files.append(os.path.join(root, file))
-    return npz_files
+            if file.endswith(".npy"):
+                npy_files.append(os.path.join(root, file))
+    return npy_files
 
 
 def get_fake_item() -> dict[str, torch.Tensor]:
@@ -24,15 +24,10 @@ def get_fake_item() -> dict[str, torch.Tensor]:
 
 def get_item(file_path: str) -> dict[str, torch.Tensor]:
     try:
-        npz_data = np.load(file_path)
+        npy_data = np.load(file_path)
         item: dict[str, torch.Tensor] = {}
 
-        print(item)
-        for key, value in npz_data.items():
-            item[key] = torch.from_numpy(value)
-
-        if "tokens" not in item:
-            raise ValueError(f"NPZ file {file_path} does not contain 'tokens' key")
+        item["tokens"] = torch.from_numpy(npy_data)
 
         if item["tokens"].dim() == 2:
             item["tokens"] = item["tokens"].squeeze()
@@ -62,7 +57,7 @@ class VoxtralDataset(td.IterableDataset):
         if self.fake:
             self.file_paths = []
         else:
-            self.file_paths = get_npz_files(config.data_path)
+            self.file_paths = get_npy_files(config.data_path)
 
         if not self.fake:
             random.seed(config.seed)

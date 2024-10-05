@@ -83,6 +83,19 @@ class VoxtralTokenizer(torch.nn.Module):
             *audio_tokens.unbind(1), factors=[1] * self.config.mimi_num_quantizers
         )
 
+        # delay text and audio tokens by a window
+        # we do this becuase the text is not perfectly 5 hz alligned, so we avoid
+        # corresopnding audio tokens appearing before the text tokens
+        #
+        # we remove the first two window of the audio tokens
+        # and the last two windows of the text tokens
+        #
+        interleaved_audio_tokens = interleaved_audio_tokens[
+            ..., int(self.config.mimi_num_quantizers * self.mimi.frame_rate * 2) :
+        ]
+
+        text_tokens = text_tokens[..., : -self.config.text_hz * 2]
+
         intermediate_tokens = [text_tokens, interleaved_audio_tokens]
         text_to_audio_factor = (
             self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
@@ -98,6 +111,7 @@ class VoxtralTokenizer(torch.nn.Module):
         text_to_audio_factor = int(
             self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
         )
+        # throw away text tokens
         text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
 
         # Discard text tokens and focus on audio tokens

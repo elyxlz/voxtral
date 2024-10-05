@@ -23,7 +23,9 @@ def test(ema_model: Voxtral, step: int, config: VoxtralTrainConfig) -> None:
     test_loader = create_loader(test_dataset, config)
     device = utils.get_device()
     ema_model = ema_model.to(device)
-    tokenizer = VoxtralTokenizer(config.voxtral_tokenizer_config)
+    tokenizer = VoxtralTokenizer(config.voxtral_tokenizer_config).to(
+        device, torch.float16
+    )
 
     total_batches = max(
         config.test_size // (test_loader.batch_size) // config.world_size, 1

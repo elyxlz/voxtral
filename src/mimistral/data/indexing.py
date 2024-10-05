@@ -1,10 +1,11 @@
 import concurrent.futures
-from youtubesearchpython import VideosSearch
-from tqdm import tqdm
+import os
 import time
 import typing
-import os
+
 from rich import print as rprint
+from tqdm import tqdm
+from youtubesearchpython import VideosSearch
 
 
 class IndexConfig(typing.NamedTuple):

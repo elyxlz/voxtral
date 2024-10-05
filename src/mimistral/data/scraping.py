@@ -1,11 +1,12 @@
-import os
-import uuid
 import hashlib
+import os
+import subprocess
 import typing
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import yt_dlp
 from tqdm import tqdm
-import subprocess
 
 
 class DownloaderConfig(typing.NamedTuple):
@@ -159,7 +160,7 @@ def scrape_youtube_urls(config: DownloaderConfig) -> None:
                     refresh=True,
                 )
 
-    print(f"Finished scraping YouTube URLs.")
+    print("Finished scraping YouTube URLs.")
     print(f"Total chunks downloaded: {total_chunks}")
     print(f"Total duration: {format_duration(total_duration)}")
 

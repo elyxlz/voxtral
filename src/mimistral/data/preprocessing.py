@@ -1,9 +1,8 @@
-import os
-import uuid
 import hashlib
+import os
 import typing
-from concurrent.futures import ThreadPoolExecutor
-from concurrent.futures import as_completed
+import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yt_dlp
 from tqdm import tqdm

@@ -194,7 +194,7 @@ class TimedWhisperTokenizer(torch.nn.Module):
         total_duration = audio.shape[1] / sample_rate
 
         outputs = generate_tokens(self.processor, self.model, audio)
-        device = outputs.device
+        device = outputs["sequences"].device
         alignment = tokens_to_words(outputs, self.tokenizer, self.language)
         [merge_punctuations(a) for a in alignment]
         buckets = []

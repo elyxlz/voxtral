@@ -168,3 +168,5 @@ cython_debug/
 *.wav
 *.mp4
 urls.txt
+data/chunks/
+data/tokens

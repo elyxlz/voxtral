@@ -9,6 +9,7 @@ dependencies = [
     "youtube-search-python>=1.6.6",
     "tqdm>=4.66.5",
     "yt-dlp>=2024.9.27",
+    "rich>=13.9.2",
 ]
 
 [build-system]

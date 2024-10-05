@@ -1,6 +1,6 @@
 import os
-import typing
 from concurrent.futures import ThreadPoolExecutor
+import pydantic_settings as pyds
 
 import numpy as np
 import torch
@@ -11,7 +11,7 @@ from tqdm import tqdm
 from voxtral.tokenizer.model import VoxtralTokenizer, VoxtralTokenizerConfig
 
 
-class PreprocessingConfig(typing.NamedTuple):
+class PreprocessingConfig(pyds.BaseSettings):
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     input_path: str = "./data/chunks"
     output_path: str = "./data/tokens"

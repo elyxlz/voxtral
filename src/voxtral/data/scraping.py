@@ -1,4 +1,5 @@
 import hashlib
+import pydantic_settings as pyds
 import os
 import subprocess
 import typing
@@ -9,7 +10,7 @@ import yt_dlp
 from tqdm import tqdm
 
 
-class ScrapingConfig(typing.NamedTuple):
+class ScrapingConfig(pyds.BaseSettings):
     input_file: str = "./data/urls.txt"
     output_path: str = "./data/chunks"
     chunk_duration: int = 20

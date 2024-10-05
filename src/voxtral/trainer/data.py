@@ -28,6 +28,9 @@ def get_item(file_path: str) -> dict[str, torch.Tensor]:
         item: dict[str, torch.Tensor] = {}
         for key, value in npz_data.items():
             item[key] = torch.from_numpy(value)
+            print(item[key].shape)
+
+        print(item.keys())
         if "tokens" not in item:
             raise ValueError(f"NPZ file {file_path} does not contain 'tokens' key")
 

@@ -15,13 +15,13 @@ class PreprocessingConfig(typing.NamedTuple):
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     input_path: str = "./data/chunks"
     output_path: str = "./data/tokens"
-    batch_size: int = 4
-    num_workers: int = 0
+    batch_size: int = 32
+    num_workers: int = 24
     pin_memory: bool = True
     compile_tokenizer: bool = False
     max_save_workers: int = 4
     use_cuda: bool = torch.cuda.is_available()
-    tokenizer_dtype: torch.dtype = torch.float32
+    tokenizer_dtype: torch.dtype = torch.float16
     chunk_frames: int = 20 * 24_000  # New parameter for fixed chunk size
     num_channels: int = 1  # New parameter for number of channels
 

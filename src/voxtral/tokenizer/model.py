@@ -71,11 +71,11 @@ class VoxtralTokenizer(torch.nn.Module):
             torch.arange(0, self.config.mimi_num_quantizers) * mimi_vocab_size
         )
 
-        print(self.device)
-        breakpoint()
+        mimi_tokens = self.mimi.encode(x.to(self.device))
+
         audio_tokens = (
-            self.mimi.encode(x.to(self.device))
-            + token_offset[None, :, None]
+            mimi_tokens
+            + token_offset[None, :, None].to(self.device)
             + self.config.text_vocab_size
         )
 

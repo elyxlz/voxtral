@@ -18,7 +18,7 @@ from functools import wraps
 import torch
 from torch import cuda
 
-_compile_disabled: bool = True  # False
+_compile_disabled: bool = False
 
 
 @contextmanager

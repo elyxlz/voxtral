@@ -15,7 +15,7 @@ class PreprocessingConfig(typing.NamedTuple):
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     input_path: str = "./data/chunks"
     output_path: str = "./data/tokens"
-    batch_size: int = 8
+    batch_size: int = 4
     num_workers: int = 20
     pin_memory: bool = True
     compile_tokenizer: bool = True  # False

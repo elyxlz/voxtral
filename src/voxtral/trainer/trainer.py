@@ -48,10 +48,28 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
     model.resize_token_embeddings(new_vocab_size)
 
     # Modify the output layer (language model head)
-    old_lm_head = model.lm_head
-    new_lm_head = torch.nn.Linear(model.config.hidden_size, new_vocab_size, bias=False)
-    new_lm_head.weight.data[:old_vocab_size, :] = old_lm_head.weight.data
-    model.lm_head = new_lm_head
+    if hasattr(model, "lm_head"):
+        old_lm_head = model.lm_head
+        new_lm_head = torch.nn.Linear(
+            model.config.hidden_size, new_vocab_size, bias=False
+        )
+
+        # Copy weights for existing vocabulary
+        with torch.no_grad():
+            if isinstance(old_lm_head, torch.nn.Linear):
+                new_lm_head.weight.data[:old_vocab_size, :] = old_lm_head.weight.data
+            elif isinstance(old_lm_head, torch.nn.Embedding):
+                new_lm_head.weight.data[:old_vocab_size, :] = old_lm_head.weight.data
+            else:
+                print(
+                    f"Warning: Unexpected type for lm_head: {type(old_lm_head)}. Initializing new weights randomly."
+                )
+
+        model.lm_head = new_lm_head
+    else:
+        print(
+            "Warning: Model does not have 'lm_head' attribute. Vocabulary expansion might not be fully applied."
+        )
 
     # Update the config
     model.config.vocab_size = new_vocab_size

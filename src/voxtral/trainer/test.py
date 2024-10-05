@@ -52,7 +52,6 @@ def test(ema_model: Voxtral, step: int, config: VoxtralTrainConfig) -> None:
         generated = ema_model.generate(
             x_cropped, max_new_tokens=config.test_num_new_tokens
         )
-        generated = x + 1  # TODO:
 
         # Decode the entire sequence
         decoded_prompt = tokenizer.decode(x_cropped)

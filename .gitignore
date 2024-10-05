@@ -170,3 +170,7 @@ cython_debug/
 urls.txt
 data/chunks/
 data/tokens
+*.part
+*.part
+*.part
+*.part

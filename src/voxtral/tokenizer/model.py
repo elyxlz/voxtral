@@ -125,8 +125,6 @@ class VoxtralTokenizer(torch.nn.Module):
         # Pad the input tensor
         z_padded = torch.nn.functional.pad(z, (0, padding), mode="constant", value=0)
 
-        breakpoint()
-
         # throw away text tokens
         text_tokens, audio_tokens = uninterleave(
             z_padded, factors=[1, text_to_audio_factor]

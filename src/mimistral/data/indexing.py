@@ -12,12 +12,12 @@ class IndexConfig(typing.NamedTuple):
     output_file: str = "./data/urls.txt"
     min_duration: int = 30 * 60
     max_retries: int = 3
-    search_limit: int = 10
+    search_limit: int = 30
     retry_delay: float = 2.0
-    max_workers: int = 1
+    max_workers: int = 32
     progress_bar: bool = True
-    use_multithreading: bool = False
-    multithreaded_sleep: float = 0.5
+    use_multithreading: bool = True
+    multithreaded_sleep: float = 3
 
 
 def search_youtube(

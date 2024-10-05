@@ -20,6 +20,9 @@ dependencies = [
   "sentencepiece>=0.2.0",
   "pydantic-settings>=2.5.2",
   "wandb>=0.18.3",
+  "peft>=0.13.0",
+  "soundfile>=0.12.1",
+  "gradio>=3.36.1",
 ]
 
 [build-system]

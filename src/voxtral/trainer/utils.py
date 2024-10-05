@@ -1,16 +1,16 @@
-import typing
-import random
-import numpy as np
 import collections
-import re
 import glob
-import huggingface_hub as hf_hub
-import rich.console
 import os
-import traceback
+import random
+import re
 import sys
-import torch
+import traceback
+import typing
 
+import huggingface_hub as hf_hub
+import numpy as np
+import rich.console
+import torch
 
 console = rich.console.Console()
 
@@ -132,26 +132,6 @@ def _save_checkpoint(
     checkpoint_files.sort(key=get_step_number, reverse=True)
     for old_checkpoint in checkpoint_files[5:]:
         os.remove(old_checkpoint)
-
-    if push:
-        api = hf_hub.HfApi()
-
-        api.create_repo(
-            repo_id=f"Audiogen/{run_id}",
-            private=True,
-            token=os.getenv("HUGGINGFACE_TOKEN"),
-            exist_ok=True,
-        )
-
-        future = api.upload_file(
-            path_or_fileobj=checkpoint_path,
-            path_in_repo=f"checkpoint_{step}.pt",
-            repo_id=f"Audiogen/{run_id}",
-            commit_message=f"{step}",
-            run_as_future=True,
-        )
-        future.result()
-        future.done()
 
     pprint(f"saved state in path {checkpoint_path}", color="bold yellow")
 

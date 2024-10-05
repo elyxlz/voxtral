@@ -58,6 +58,7 @@ class VoxtralTokenizer(torch.nn.Module):
     def device(self) -> torch.device:
         return next(self.mimi.parameters()).device
 
+    @torch.no_grad()
     def encode(self, x: torch.Tensor, sample_rate: int) -> torch.Tensor:
         assert x.dim() == 3
         assert x.size(1) == 1
@@ -107,13 +108,27 @@ class VoxtralTokenizer(torch.nn.Module):
 
         return tokens
 
+    @torch.no_grad()
     def decode(self, z: torch.Tensor) -> torch.Tensor:
         # Uninterleave tokens to separate text and audio tokens
         text_to_audio_factor = int(
             self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
         )
+
+        # Calculate padding
+        total_length = z.size(-1)
+        required_length = (total_length // (1 + text_to_audio_factor) + 1) * (
+            1 + text_to_audio_factor
+        )
+        padding = required_length - total_length
+
+        # Pad the input tensor
+        z_padded = torch.nn.functional.pad(z, (0, padding), mode="constant", value=0)
+
         # throw away text tokens
-        text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
+        text_tokens, audio_tokens = uninterleave(
+            z_padded, factors=[1, text_to_audio_factor]
+        )
 
         # Discard text tokens and focus on audio tokens
         audio_tokens = audio_tokens - self.config.text_vocab_size
@@ -133,6 +148,9 @@ class VoxtralTokenizer(torch.nn.Module):
             * mimi_vocab_size
         )
         audio_tokens = audio_tokens - token_offset[None, :, None]
+        audio_tokens = torch.clamp(
+            audio_tokens, min=0, max=self.mimi.quantizer.cardinality
+        )
 
         # Decode audio tokens using mimi
         decoded_audio = self.mimi.decode(audio_tokens)

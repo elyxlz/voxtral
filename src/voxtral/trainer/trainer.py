@@ -1,29 +1,25 @@
 import copy
-import dotenv
 import dataclasses
 import datetime
 import os
 import time
 
+import dotenv
+import peft
 import torch
 import torch.distributed as dist
 import tqdm
+import transformers as tr
+import voxtral.trainer.utils as utils
 import wandb
 from torch.nn.parallel import DistributedDataParallel
-import transformers as tr
-
 from voxtral.trainer.config import VoxtralTrainConfig
 from voxtral.trainer.data import VoxtralDataset
 from voxtral.trainer.test import test
-import voxtral.trainer.train_utils as utils
 
 dotenv.load_dotenv()
 
 Voxtral = tr.MistralForCausalLM
-
-# TODO:
-# lora
-# prune layers
 
 
 @dataclasses.dataclass
@@ -43,8 +39,34 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
         config.mistral_pretrained_path,
         **config.mistral_kwargs,
     )
-    model = model.train()
 
+    # Apply layer pruning if enabled
+    if config.prune_layers is not None:
+        layers_to_remove = list(
+            range(config.prune_layers - 1, len(model.model.layers), config.prune_layers)
+        )
+        for layer_idx in sorted(layers_to_remove, reverse=True):
+            del model.model.layers[layer_idx]
+        model.config.num_hidden_layers = len(model.model.layers)
+
+    # Apply LoRA if enabled
+    if config.lora_rank is not None:
+        lora_target_modules = [
+            name
+            for name, module in model.named_modules()
+            if isinstance(module, torch.nn.Linear)
+        ]
+        lora_config = peft.LoraConfig(
+            r=config.lora_rank,
+            lora_alpha=config.lora_rank * 2,  # Default alpha as 2 * rank
+            target_modules=lora_target_modules,
+            bias="none",
+            task_type=peft.TaskType.CAUSAL_LM,
+        )
+        model = peft.get_peft_model(model, lora_config)
+        model.print_trainable_parameters()
+
+    model = model.train()
     model = model.to(device, torch.bfloat16)
 
     # initialize ema
@@ -55,17 +77,25 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
 
     optimizer_params = [
         {
-            "params": [p for p in model.parameters() if p.dim() > 1],
+            "params": [
+                p
+                for n, p in model.named_parameters()
+                if p.requires_grad and p.dim() > 1
+            ],
             "weight_decay": config.weight_decay,
         },
         {
-            "params": [p for p in model.parameters() if p.dim() == 1],
+            "params": [
+                p
+                for n, p in model.named_parameters()
+                if p.requires_grad and p.dim() == 1
+            ],
             "weight_decay": 0.0,
         },
     ]
 
     # initialize optimizer and scheduler
-    optimizer = torch.optim.AdamW(  # type: ignore
+    optimizer = torch.optim.AdamW(
         optimizer_params,
         lr=config.lr,
         betas=config.lr_betas,
@@ -307,7 +337,7 @@ def train(config: VoxtralTrainConfig) -> None:
 
         if config.push_every and state.step % config.push_every == 0:
             utils.rank_0_only(state.ema.push_to_hub)(
-                f"Audiogen/{config.name}",
+                f"{config.name}",
                 commit_message=f"step {state.step}, run_id {config.run_id}",
                 private=True,
             )

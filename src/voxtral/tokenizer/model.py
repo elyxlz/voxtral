@@ -115,16 +115,6 @@ class VoxtralTokenizer(torch.nn.Module):
             self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
         )
 
-        # Calculate padding
-        total_length = z.size(-1)
-        required_length = (total_length // (1 + text_to_audio_factor) + 1) * (
-            1 + text_to_audio_factor
-        )
-        padding = required_length - total_length
-
-        # Pad the input tensor
-        z_padded = torch.nn.functional.pad(z, (0, padding), mode="constant", value=0)
-
         # throw away text tokens
         text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
 

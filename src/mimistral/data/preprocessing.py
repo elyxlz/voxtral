@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
-from mimistral.tokenizer import MimistralTokenizer
+from mimistral.tokenizer.model import MimistralTokenizer
 
 
 class PreprocessingConfig(typing.NamedTuple):

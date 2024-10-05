@@ -1,4 +1,4 @@
-from mimistral.data.preprocessing import PreprocessingConfig, preprocess_audio_chunks
+from voxtral.data.preprocessing import PreprocessingConfig, preprocess_audio_chunks
 
 config = PreprocessingConfig()
 preprocess_audio_chunks(config)

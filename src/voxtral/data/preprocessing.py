@@ -8,7 +8,7 @@ import torchaudio
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from mimistral.tokenizer.model import MimistralTokenizer
+from voxtral.tokenizer.model import VoxtralTokenizer
 
 
 class PreprocessingConfig(typing.NamedTuple):
@@ -110,11 +110,11 @@ def preprocess_audio_chunks(config: PreprocessingConfig):
     dataloader = _create_dataloader(config)
 
     device = torch.device("cuda" if config.use_cuda else "cpu")
-    tokenizer = MimistralTokenizer(**config.tokenizer_kwargs).to(
+    tokenizer = VoxtralTokenizer(**config.tokenizer_kwargs).to(
         device=device, dtype=config.tokenizer_dtype
     )
     if config.compile_tokenizer:
-        tokenizer: MimistralTokenizer = torch.compile(tokenizer)  # type: ignore
+        tokenizer: VoxtralTokenizer = torch.compile(tokenizer)  # type: ignore
 
     save_executor = ThreadPoolExecutor(max_workers=config.max_save_workers)
 

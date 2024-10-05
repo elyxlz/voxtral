@@ -53,6 +53,10 @@ class VoxtralTokenizer(torch.nn.Module):
         # whisper
         self.whisper = TimedWhisperTokenizer(config.whisper_path, hertz=config.text_hz)
 
+    @property
+    def device(self) -> torch.device:
+        return next(self.parameters()).device
+
     def encode(self, x: torch.Tensor, sample_rate: int) -> torch.Tensor:
         assert x.dim() == 3
         assert x.size(1) == 1
@@ -68,7 +72,7 @@ class VoxtralTokenizer(torch.nn.Module):
         )
 
         audio_tokens = (
-            self.mimi.encode(x)
+            self.mimi.encode(x.to(self.device))
             + token_offset[None, :, None]
             + self.config.text_vocab_size
         )

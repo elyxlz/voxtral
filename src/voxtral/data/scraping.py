@@ -131,10 +131,24 @@ def format_duration(seconds: int) -> str:
 
 def scrape_youtube_urls(config: ScrapingConfig) -> None:
     print("Starting YouTube URL scraping process")
+
+    # Check if FFmpeg is installed
+    try:
+        subprocess.run(["ffmpeg", "-version"], check=True, capture_output=True)
+    except subprocess.CalledProcessError:
+        print(
+            "Error: FFmpeg is not installed. Please install FFmpeg before running this script."
+        )
+        return
+    except FileNotFoundError:
+        print(
+            "Error: FFmpeg is not found in the system PATH. Please install FFmpeg or add it to the PATH."
+        )
+        return
+
     if not os.path.exists(config.output_path):
         os.makedirs(config.output_path)
         print(f"Created output directory: {config.output_path}")
-
     try:
         with open(config.input_file, "r") as file:
             urls = [line.strip() for line in file if line.strip()]

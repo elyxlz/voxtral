@@ -46,6 +46,7 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
 
     # Resize token embeddings
     model.resize_token_embeddings(new_vocab_size)
+    breakpoint()
 
     # Modify the output layer (language model head)
     if hasattr(model, "lm_head"):

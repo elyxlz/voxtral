@@ -126,9 +126,7 @@ class VoxtralTokenizer(torch.nn.Module):
         z_padded = torch.nn.functional.pad(z, (0, padding), mode="constant", value=0)
 
         # throw away text tokens
-        text_tokens, audio_tokens = uninterleave(
-            z_padded, factors=[1, text_to_audio_factor]
-        )
+        text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
 
         # Discard text tokens and focus on audio tokens
         audio_tokens = audio_tokens - self.config.text_vocab_size

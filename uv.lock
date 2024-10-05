@@ -286,7 +286,7 @@ requires-dist = [
     { name = "torch", specifier = ">=2.4.1" },
     { name = "tqdm", specifier = ">=4.66.5" },
     { name = "youtube-search-python", specifier = ">=1.6.6" },
-    { name = "yt-dlp" },
+    { name = "yt-dlp", specifier = ">=2024.9.27" },
 ]
 
 [[package]]

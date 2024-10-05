@@ -16,7 +16,7 @@ class PreprocessingConfig(typing.NamedTuple):
     input_path: str = "./data/chunks"
     output_path: str = "./data/tokens"
     batch_size: int = 32
-    num_workers: int = 24
+    num_workers: int = 20
     pin_memory: bool = True
     compile_tokenizer: bool = False
     max_save_workers: int = 4

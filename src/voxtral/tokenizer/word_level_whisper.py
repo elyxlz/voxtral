@@ -1,25 +1,36 @@
-class TimedWhisperTokenizer(nn.Module):
-    """Transcribe text with word-level timestamps with whisper, and encode using llama tokenizer at a time interval with padding tokens"""
+import torch
+import string
+import transformers as tr
+import dataclasses
 
-    def __init__(
-        self,
-        model_name: str,
-        hertz: int,
-    ):
+
+@dataclasses.dataclass
+class WordTiming:
+    word: str
+    tokens: list[int]
+    start: float
+    end: float
+    probability: float
+
+
+class TimedWhisperTokenizer(torch.nn.Module):
+    """Transcribe text with word-level timestamps with whisper, and encode using mistral tokenizer at a time interval with padding tokens"""
+
+    def __init__(self, model_name: str, hertz: int) -> None:
         super().__init__()
-        self.processor = WhisperProcessor.from_pretrained(model_name)
-        self.model = WhisperForConditionalGeneration.from_pretrained(model_name)
+        self.processor = tr.WhisperProcessor.from_pretrained(model_name)
+        self.model = tr.WhisperForConditionalGeneration.from_pretrained(model_name)
         self.language = "en"
         self.tokenizer = self.processor.tokenizer
 
         self.hertz = hertz
 
-        self.llama_tokenizer = AutoTokenizer.from_pretrained(
-            "huggyllama/llama-7b",
+        self.mistral_tokenizer = tr.AutoTokenizer.from_pretrained(
+            "mistralai/Mistral-7B-Instruct-v0.3",
             padding_side="right",
             add_prefix_space=False,
         )
-        self.llama_tokenizer.pad_token = self.llama_tokenizer.eos_token
+        self.mistral_tokenizer.pad_token = self.mistral_tokenizer.eos_token
 
     def generate_tokens(self, audio):
         input_features = self.processor(
@@ -191,7 +202,7 @@ class TimedWhisperTokenizer(nn.Module):
 
         return buckets
 
-    def forward(self, audio: Tensor, sample_rate: int = 16000):
+    def forward(self, audio: torch.Tensor, sample_rate: int) -> torch.Tensor:
         assert sample_rate == 16000, "Sample rate must be 16000"
         assert audio.ndim == 2, "Audio must be 2D, batch x time"
         total_duration = audio.shape[1] / sample_rate
@@ -205,7 +216,7 @@ class TimedWhisperTokenizer(nn.Module):
                 a, bucket_size=1.0, total_duration=total_duration
             )
             out = ["".join(b) for b in out]
-            tokens = self.llama_tokenizer(
+            tokens = self.mistral_tokenizer(
                 out,
                 padding="max_length",
                 max_length=self.hertz,

@@ -2,6 +2,7 @@ import concurrent.futures
 import os
 import time
 import typing
+from concurrent.futures import TimeoutError
 
 from rich import print as rprint
 from tqdm import tqdm
@@ -19,6 +20,7 @@ class IndexConfig(typing.NamedTuple):
     progress_bar: bool = True
     use_multithreading: bool = True
     multithreaded_sleep: float = 3
+    search_timeout: int = 30  # New parameter for search timeout in seconds
 
 
 def search_youtube(
@@ -139,36 +141,62 @@ def index_youtube_urls(config: IndexConfig) -> None:
                 max_workers=config.max_workers
             ) as executor:
                 # Submit all search tasks
-                futures = executor.map(configured_search, search_terms)
-                # Use tqdm for progress bar
-                for results in futures:
-                    for url, duration in results:
-                        if url not in existing_urls:
-                            out_file.write(f"{url}\n")
-                            existing_urls.add(url)
-                            total_duration += duration
+                futures = {
+                    executor.submit(configured_search, term): term
+                    for term in search_terms
+                }
+
+                for future in concurrent.futures.as_completed(futures):
+                    term = futures[future]
+                    try:
+                        results = future.result(timeout=config.search_timeout)
+                        for url, duration in results:
+                            if url not in existing_urls:
+                                out_file.write(f"{url}\n")
+                                existing_urls.add(url)
+                                total_duration += duration
+                    except TimeoutError:
+                        rprint(
+                            f"[bold yellow]Search for '{term}' timed out after {config.search_timeout} seconds."
+                        )
+                    except Exception as e:
+                        rprint(f"[bold red]Error searching for '{term}': {str(e)}")
+                    finally:
+                        pbar.set_postfix(
+                            {"Total Duration": format_duration(total_duration)},
+                            refresh=True,
+                        )
+                        pbar.update(1)
+                        time.sleep(
+                            config.multithreaded_sleep
+                        )  # Add sleep to avoid rate limits
+        else:
+            rprint("[yellow]Using single-threaded search.")
+            # Single-threaded execution with tqdm progress bar
+            for term in search_terms:
+                try:
+                    with concurrent.futures.ThreadPoolExecutor(
+                        max_workers=1
+                    ) as executor:
+                        future = executor.submit(configured_search, term)
+                        results = future.result(timeout=config.search_timeout)
+                        for url, duration in results:
+                            if url not in existing_urls:
+                                out_file.write(f"{url}\n")
+                                existing_urls.add(url)
+                                total_duration += duration
+                except TimeoutError:
+                    rprint(
+                        f"[bold yellow]Search for '{term}' timed out after {config.search_timeout} seconds."
+                    )
+                except Exception as e:
+                    rprint(f"[bold red]Error searching for '{term}': {str(e)}")
+                finally:
                     pbar.set_postfix(
                         {"Total Duration": format_duration(total_duration)},
                         refresh=True,
                     )
                     pbar.update(1)
-                    time.sleep(
-                        config.multithreaded_sleep
-                    )  # Add sleep to avoid rate limits
-        else:
-            rprint("[yellow]Using single-threaded search.")
-            # Single-threaded execution with tqdm progress bar
-            for term in search_terms:
-                results = configured_search(term)
-                for url, duration in results:
-                    if url not in existing_urls:
-                        out_file.write(f"{url}\n")
-                        existing_urls.add(url)
-                        total_duration += duration
-                pbar.set_postfix(
-                    {"Total Duration": format_duration(total_duration)}, refresh=True
-                )
-                pbar.update(1)
 
         pbar.close()
 

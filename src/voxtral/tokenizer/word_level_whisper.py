@@ -162,10 +162,10 @@ def separate_into_buckets(
 def generate_tokens(
     processor: typing.Any, model: typing.Any, audio: torch.Tensor
 ) -> dict[str, typing.Any]:
+    device = next(model.parameters()).device
     input_features = processor(
         audio.numpy(), sampling_rate=16000, return_tensors="pt"
-    ).input_features.to(audio.device, audio.dtype)
-    print(input_features.device, next(model.parameters()).device)
+    ).input_features.to(device, audio.dtype)
     return model.generate(
         input_features, return_timestamps=True, return_token_timestamps=True
     )

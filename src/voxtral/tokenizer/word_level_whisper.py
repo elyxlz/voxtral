@@ -16,12 +16,9 @@ class WordTiming:
 
 
 def clean_text(text: str) -> str:
-    # Remove timestamp markers
     cleaned = re.sub(r"<\|[\d.]+\|>", "", text)
-    # Remove leading and trailing whitespace
     cleaned = cleaned.strip()
-    # Replace multiple consecutive spaces with a single space
-    cleaned = re.sub(r"\s+", " ", cleaned)
+    cleaned = re.sub(r" +", " ", cleaned)
     return cleaned
 
 
@@ -167,7 +164,7 @@ def generate_tokens(
 ) -> dict[str, typing.Any]:
     input_features = processor(
         audio.numpy(), sampling_rate=16000, return_tensors="pt"
-    ).input_features
+    ).input_features.to(audio.device, audio.dtype)
     return model.generate(
         input_features, return_timestamps=True, return_token_timestamps=True
     )
@@ -180,7 +177,7 @@ class TimedWhisperTokenizer(torch.nn.Module):
         self.model = tr.WhisperForConditionalGeneration.from_pretrained(model_name)
 
         self.language: str = "en"
-        self.tokenizer: typing.Any = self.processor.tokenizer
+        self.tokenizer: typing.Any = self.processor.tokenizer  # type: ignore
         self.hertz: int = hertz
 
         self.mistral_tokenizer: tr.AutoTokenizer = tr.AutoTokenizer.from_pretrained(
@@ -203,9 +200,8 @@ class TimedWhisperTokenizer(torch.nn.Module):
             out = separate_into_buckets(
                 a, bucket_size=1.0, total_duration=total_duration
             )
-            out = [clean_text("".join(b)) for b in out]
-            print(out)
-            tokens = self.mistral_tokenizer(
+            out = [clean_text(" ".join(b)) for b in out]
+            tokens = self.mistral_tokenizer(  # type: ignore
                 out,
                 padding="max_length",
                 max_length=self.hertz,

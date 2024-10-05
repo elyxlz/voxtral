@@ -1,4 +1,3 @@
-import torch
 import torchaudio
 from voxtral.tokenizer.model import VoxtralTokenizerConfig, VoxtralTokenizer
 
@@ -22,4 +21,5 @@ print(waveform.shape)
 encoded = tokenizer.encode(waveform, 24_000)
 print("Encoded shape:", encoded.shape)
 
-# decoded = tokenizer.decode(encoded)
+decoded = tokenizer.decode(encoded)
+torchaudio.save("recon.wav", decoded[0], 24_000)

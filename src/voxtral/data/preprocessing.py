@@ -8,22 +8,21 @@ import torchaudio
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from voxtral.tokenizer.model import VoxtralTokenizer
+from voxtral.tokenizer.model import VoxtralTokenizer, VoxtralTokenizerConfig
 
 
 class PreprocessingConfig(typing.NamedTuple):
-    input_path: str = "data/chunks"
-    output_path: str = "data/tokens"
-    batch_size: int = 32
-    num_workers: int = 4
+    voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
+    input_path: str = "./data/chunks"
+    output_path: str = "./data/tokens"
+    batch_size: int = 4
+    num_workers: int = 0
     pin_memory: bool = True
     compile_tokenizer: bool = False
-    tokenizer_kwargs: dict = {}
-    target_sample_rate: int = 16000
     max_save_workers: int = 4
     use_cuda: bool = torch.cuda.is_available()
     tokenizer_dtype: torch.dtype = torch.float32
-    chunk_frames: int = 16000  # New parameter for fixed chunk size
+    chunk_frames: int = 20 * 24_000  # New parameter for fixed chunk size
     num_channels: int = 1  # New parameter for number of channels
 
 
@@ -34,11 +33,13 @@ class AudioChunkDataset(Dataset):
         target_sample_rate: int,
         chunk_frames: int,
         num_channels: int,
-    ):
+        dtype: torch.dtype,
+    ) -> None:
         self.input_path = input_path
         self.target_sample_rate = target_sample_rate
         self.chunk_frames = chunk_frames
         self.num_channels = num_channels
+        self.dtype = dtype
         self.file_list = []
         self._find_audio_files(input_path)
 
@@ -77,15 +78,18 @@ class AudioChunkDataset(Dataset):
         elif waveform.shape[1] > self.chunk_frames:
             waveform = waveform[:, : self.chunk_frames]
 
+        waveform = waveform.to(self.dtype)
+
         return waveform, os.path.basename(self.file_list[idx])
 
 
 def _create_dataloader(config: PreprocessingConfig) -> DataLoader:
     dataset = AudioChunkDataset(
         config.input_path,
-        config.target_sample_rate,
-        config.chunk_frames,
-        config.num_channels,
+        target_sample_rate=24_000,
+        chunk_frames=config.chunk_frames,
+        num_channels=config.num_channels,
+        dtype=config.tokenizer_dtype,
     )
     return DataLoader(
         dataset,
@@ -110,7 +114,7 @@ def preprocess_audio_chunks(config: PreprocessingConfig):
     dataloader = _create_dataloader(config)
 
     device = torch.device("cuda" if config.use_cuda else "cpu")
-    tokenizer = VoxtralTokenizer(**config.tokenizer_kwargs).to(
+    tokenizer = VoxtralTokenizer(config.voxtral_tokenizer_config).to(
         device=device, dtype=config.tokenizer_dtype
     )
     if config.compile_tokenizer:
@@ -120,9 +124,9 @@ def preprocess_audio_chunks(config: PreprocessingConfig):
 
     for batch in tqdm(dataloader, desc="Processing audio chunks"):
         waveforms, filenames = batch
-        for waveform, filename in zip(waveforms, filenames):
-            encoded = tokenizer.encode(waveform)
-            save_executor.submit(_save_tokens, encoded, filename, config.output_path)
+        encoded = tokenizer.encode(waveforms, 24_000)
+        for z, filename in zip(encoded, filenames):
+            save_executor.submit(_save_tokens, z, filename, config.output_path)
 
     save_executor.shutdown(wait=True)
 

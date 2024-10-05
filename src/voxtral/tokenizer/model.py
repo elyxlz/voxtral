@@ -1,9 +1,3 @@
-"""
-composite tokenizer mimi + word level whisper into mistral text tokens
-coarse to fine [text (5hz) -> semantic tokens (12.5hz) -> acoustic tokens (87.5hz)].
-total = 105hz
-"""
-
 import torch
 import torchaudio as ta
 import huggingface_hub as hf_hub
@@ -21,12 +15,12 @@ class VoxtralTokenizerConfig(typing.NamedTuple):
     whisper_path: str = "openai/whisper-tiny.en"
     text_hz: int = 5
     mimi_num_quantizers: int = 8
+    text_vocab_size: int = 32768
 
 
-def interleave(*seqs: list[torch.Tensor]):
+def interleave(*seqs: list[torch.Tensor], factors: list[int]):
     assert isinstance(seqs[0], torch.Tensor)
     bs = seqs[0].size(0)
-    factors = [2**i for i in range(len(seqs))]
 
     to_cat = []
     for i, seq in enumerate(seqs):
@@ -38,8 +32,7 @@ def interleave(*seqs: list[torch.Tensor]):
     return out.view(bs, -1)
 
 
-def uninterleave(x: torch.Tensor, n: int) -> list[torch.Tensor]:
-    factors = [2**i for i in range(n)]
+def uninterleave(x: torch.Tensor, factors: list[int]) -> list[torch.Tensor]:
     bs = x.size(0)
     chunks = x.view(bs, -1, sum(factors))
     splits = chunks.split(factors, dim=-1)
@@ -68,13 +61,62 @@ class VoxtralTokenizer(torch.nn.Module):
 
         text_tokens = self.whisper(x_for_whisper, sample_rate=16_000)
 
-        audio_tokens = self.mimi.encode(x)
+        # make sure every quantizer uses different tokens
+        mimi_vocab_size = self.mimi.quantizer.cardinality
+        token_offset = (
+            torch.arange(0, self.config.mimi_num_quantizers) * mimi_vocab_size
+        )
 
-        breakpoint()
-        return audio_tokens
+        audio_tokens = (
+            self.mimi.encode(x)
+            + token_offset[None, :, None]
+            + self.config.text_vocab_size
+        )
+
+        interleaved_audio_tokens = interleave(
+            *audio_tokens.unbind(1), factors=[1] * self.config.mimi_num_quantizers
+        )
+
+        intermediate_tokens = [text_tokens, interleaved_audio_tokens]
+        text_to_audio_factor = (
+            self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
+        )
+        tokens = interleave(
+            *intermediate_tokens, factors=[1, int(text_to_audio_factor)]
+        )
+
+        return tokens
 
     def decode(self, z: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError()
+        # Uninterleave tokens to separate text and audio tokens
+        text_to_audio_factor = int(
+            self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
+        )
+        text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
+
+        # Discard text tokens and focus on audio tokens
+        audio_tokens = audio_tokens - self.config.text_vocab_size
+
+        # Uninterleave audio tokens
+        audio_tokens = uninterleave(
+            audio_tokens, factors=[1] * self.config.mimi_num_quantizers
+        )
+
+        # Restack audio tokens to shape (batch_size, num_quantizers, sequence_length)
+        audio_tokens = torch.stack(audio_tokens, dim=1)
+
+        # Undo the token offset
+        mimi_vocab_size = self.mimi.quantizer.cardinality
+        token_offset = (
+            torch.arange(0, self.config.mimi_num_quantizers, device=audio_tokens.device)
+            * mimi_vocab_size
+        )
+        audio_tokens = audio_tokens - token_offset[None, :, None]
+
+        # Decode audio tokens using mimi
+        decoded_audio = self.mimi.decode(audio_tokens)
+
+        return decoded_audio
 
 
 if __name__ == "__main__":
@@ -83,12 +125,12 @@ if __name__ == "__main__":
     tokenizer = VoxtralTokenizer(config)
 
     # Create a dummy audio input tensor
-    dummy_audio = torch.randn(1, 16000)  # Assuming 1 second of audio at 16kHz
+    dummy_audio = torch.randn(1, 1, 24000)  # Assuming 1 second of audio at 24kHz
 
     # Encode the audio
-    encoded = tokenizer.encode(dummy_audio)
+    encoded = tokenizer.encode(dummy_audio, sample_rate=24000)
     print("Encoded shape:", encoded.shape)
 
-    # decoded = tokenizer.decode(encoded)
-    #
-    #
+    # Decode the encoded tokens
+    decoded = tokenizer.decode(encoded)
+    print("Decoded shape:", decoded.shape)

@@ -9,7 +9,7 @@ import yt_dlp
 from tqdm import tqdm
 
 
-class DownloaderConfig(typing.NamedTuple):
+class ScrapingConfig(typing.NamedTuple):
     input_file: str = "./data/urls.txt"
     output_path: str = "./data/chunks"
     chunk_duration: int = 20
@@ -24,7 +24,7 @@ def generate_filename(url: str, chunk_number: int, chunk_size: int) -> str:
 
 
 def download_and_chunk_video(
-    url: str, config: DownloaderConfig
+    url: str, config: ScrapingConfig
 ) -> typing.Tuple[int, int]:
     print(f"Processing {url}")
     duration = get_video_duration(url)
@@ -129,7 +129,7 @@ def format_duration(seconds: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 
-def scrape_youtube_urls(config: DownloaderConfig) -> None:
+def scrape_youtube_urls(config: ScrapingConfig) -> None:
     print("Starting YouTube URL scraping process")
     if not os.path.exists(config.output_path):
         os.makedirs(config.output_path)
@@ -175,6 +175,6 @@ def scrape_youtube_urls(config: DownloaderConfig) -> None:
 
 if __name__ == "__main__":
     print("Script started")
-    config = DownloaderConfig()
+    config = ScrapingConfig()
     scrape_youtube_urls(config)
     print("Script finished")

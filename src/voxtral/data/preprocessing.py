@@ -18,7 +18,7 @@ class PreprocessingConfig(typing.NamedTuple):
     batch_size: int = 32
     num_workers: int = 20
     pin_memory: bool = True
-    compile_tokenizer: bool = False
+    compile_tokenizer: bool = True  # False
     max_save_workers: int = 4
     use_cuda: bool = torch.cuda.is_available()
     tokenizer_dtype: torch.dtype = torch.float16

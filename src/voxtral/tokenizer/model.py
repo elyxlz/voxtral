@@ -14,7 +14,7 @@ class VoxtralTokenizerConfig(typing.NamedTuple):
     mimi_path: str = "kyutai/mimi"
     whisper_path: str = "openai/whisper-tiny.en"
     text_hz: int = 5
-    mimi_num_quantizers: int = 8
+    mimi_num_quantizers: int = 4
     text_vocab_size: int = 32768
 
 

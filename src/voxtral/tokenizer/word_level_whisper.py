@@ -77,7 +77,7 @@ def tokens_to_words(
     timings = []
 
     for batch_idx in range(generate_outputs["sequences"].shape[0]):
-        predicted_ids = generate_outputs["sequences"][batch_idx].numpy()
+        predicted_ids = generate_outputs["sequences"][batch_idx].cpu().numpy()
         token_timestamps = generate_outputs["token_timestamps"][batch_idx].numpy()
 
         text_tokens = [token for token in predicted_ids]
@@ -194,6 +194,7 @@ class TimedWhisperTokenizer(torch.nn.Module):
         total_duration = audio.shape[1] / sample_rate
 
         outputs = generate_tokens(self.processor, self.model, audio)
+        device = outputs.device
         alignment = tokens_to_words(outputs, self.tokenizer, self.language)
         [merge_punctuations(a) for a in alignment]
         buckets = []
@@ -211,5 +212,5 @@ class TimedWhisperTokenizer(torch.nn.Module):
                 add_special_tokens=False,
             )
             buckets.append(tokens["input_ids"])
-        buckets = torch.stack(buckets).view(len(buckets), -1)
+        buckets = torch.stack(buckets).view(len(buckets), -1).to(device)
         return buckets

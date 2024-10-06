@@ -17,7 +17,6 @@ SAMPLE_RATE = 24000
 FRAME_RATE = 12.5
 
 TEXT_TOKENIZER_NAME = "tokenizer_spm_32k_3.model"
-MOSHI_NAME = "model.safetensors"
 MIMI_NAME = "tokenizer-e351c8d8-checkpoint125.safetensors"
 DEFAULT_REPO = "kyutai/moshiko-pytorch-bf16"
 
@@ -136,23 +135,4 @@ def get_mimi(filename: str | Path, device: torch.device | str = "cpu") -> MimiMo
         pkg = torch.load(filename, "cpu")
         model.load_state_dict(pkg["model"])
     model.set_num_codebooks(8)
-    return model
-
-
-def get_moshi_lm(filename: str | Path, device: torch.device | str = "cpu") -> LMModel:
-    dtype = torch.bfloat16
-    model = LMModel(
-        device=device,
-        dtype=dtype,
-        **_lm_kwargs,
-    ).to(device=device, dtype=dtype)
-    model.eval()
-    if _is_safetensors(filename):
-        load_model(model, filename)
-    else:
-        pkg = torch.load(
-            filename,
-            "cpu",
-        )
-        model.load_state_dict(pkg["fsdp_best_state"]["model"])
     return model

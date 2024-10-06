@@ -49,7 +49,9 @@ def test(ema_model: Voxtral, step: int, config: VoxtralTrainConfig) -> None:
         x_cropped = x[..., : x.size(-1) // 2]
 
         # Generate new tokens
-        generated = ema_model.generate(x_cropped, max_new_tokens=x.size(-1) // 2)
+        generated = ema_model.generate(
+            x_cropped, max_new_tokens=x.size(-1) // 2, eos_token_id=99999
+        )
 
         # Decode the entire sequence
         decoded_generation = tokenizer.decode(generated)

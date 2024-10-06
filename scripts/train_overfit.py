@@ -34,6 +34,7 @@ config = VoxtralTrainConfig(
     max_steps=30_000,
     ## test
     test_every=100,
+    generate_kwargs={"do_sample": False},
     ## logging and checkpointing
     watch_every=None,
     ckpt_path=None,

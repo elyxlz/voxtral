@@ -66,6 +66,7 @@ class VoxtralTrainConfig(BaseConfig):
 
     ## test
     test_every: int | None = 10
+    generate_kwargs: dict = {}
 
     ## logging and checkpointing
     watch_every: int | None = None

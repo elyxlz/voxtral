@@ -91,7 +91,6 @@ def download_and_chunk_video(
         return 0, 0
 
     # Count the number of chunks created
-    # Count the number of chunks created
     chunks_downloaded = len(
         [
             f

@@ -38,6 +38,7 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
     model = Voxtral.from_pretrained(
         config.mistral_pretrained_path,
         use_cache=False,
+        eos_token_id=99999,
         **config.mistral_kwargs,
     )
 

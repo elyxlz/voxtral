@@ -1,4 +1,4 @@
-import pyds as pyds
+import pydantic_settings as pyds
 import wandb.util
 from voxtral.tokenizer.model import VoxtralTokenizerConfig
 

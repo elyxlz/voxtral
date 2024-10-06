@@ -2,7 +2,7 @@ from voxtral.tokenizer.model import VoxtralTokenizerConfig
 from voxtral.trainer.trainer import VoxtralTrainConfig, train
 
 config = VoxtralTrainConfig(
-    name="voxtral-train-run",
+    name="voxtral-train-overfit",
     seed=42,
     mistral_pretrained_path="mistralai/Mistral-7B-v0.3",
     mistral_kwargs={},

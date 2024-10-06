@@ -19,7 +19,7 @@ def get_npy_files(path: str) -> list[str]:
 
 
 def get_fake_item() -> dict[str, torch.Tensor]:
-    return {"tokens": torch.randint(0, 1000, (100,))}
+    return {"tokens": torch.randint(0, 1000, (220,))}
 
 
 def get_item(file_path: str) -> dict[str, torch.Tensor]:

@@ -9,7 +9,7 @@ config = VoxtralTrainConfig(
     voxtral_tokenizer_config=VoxtralTokenizerConfig(),
     new_vocab_size=2**16,
     lora_rank=64,
-    prune_layers=None,  # half parameter count
+    prune_layers=2,  # half parameter count
     codec_hz=55,
     ## ema
     ema_gamma=16,

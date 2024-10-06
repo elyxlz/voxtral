@@ -41,8 +41,7 @@ def init_train_state(config: VoxtralTrainConfig) -> TrainState:
     )
 
     # Increase vocab size to 2^16
-    new_vocab_size = 2**16
-    model.resize_token_embeddings(new_vocab_size)
+    model.resize_token_embeddings(config.new_vocab_size)
 
     # Apply layer pruning if enabled
     if config.prune_layers is not None:

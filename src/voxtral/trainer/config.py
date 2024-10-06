@@ -12,6 +12,7 @@ class VoxtralTrainConfig(pyds.BaseSettings):
     mistral_pretrained_path: str = "nilq/mistral-1L-tiny"  # "mistralai/Mistral-7B-v0.3"
     mistral_kwargs: dict = {}
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
+    new_vocab_size: int = 2**16
     lora_rank: int | None = None
     prune_layers: int | None = None  # no layer dropout
     codec_hz: int = 55
@@ -23,9 +24,9 @@ class VoxtralTrainConfig(pyds.BaseSettings):
     ## dataset
     data_path: str = "./data/tokens"
     fake: bool = True
+    overfit: int | None = None
     batch_size: int = 2
     num_workers: int = 4
-    val_size: int = 500
     test_size: int = 4
 
     ## speed
@@ -42,9 +43,7 @@ class VoxtralTrainConfig(pyds.BaseSettings):
     max_steps: int = 500
 
     ## test
-    test_every: int | None = 250
-    test_num_prompt_tokens: int = 55
-    test_num_new_tokens: int = 55
+    test_every: int | None = 10
 
     ## logging and checkpointing
     watch_every: int | None = None

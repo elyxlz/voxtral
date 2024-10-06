@@ -1,9 +1,31 @@
-import pydantic_settings as pyds
+import pyds as pyds
 import wandb.util
 from voxtral.tokenizer.model import VoxtralTokenizerConfig
 
 
-class VoxtralTrainConfig(pyds.BaseSettings):
+class BaseConfig(pyds.BaseSettings):
+    """Pydantic base settings but env variables take absolute priority"""
+
+    model_config = pyds.SettingsConfigDict(env_parse_none_str="None")
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[pyds.BaseSettings],
+        init_settings: pyds.PydanticBaseSettingsSource,
+        env_settings: pyds.PydanticBaseSettingsSource,
+        dotenv_settings: pyds.PydanticBaseSettingsSource,
+        file_secret_settings: pyds.PydanticBaseSettingsSource,
+    ) -> tuple[pyds.PydanticBaseSettingsSource, ...]:
+        return (
+            env_settings,
+            init_settings,
+            dotenv_settings,
+            file_secret_settings,
+        )  # switched order
+
+
+class VoxtralTrainConfig(BaseConfig):
     run_id: str = wandb.util.generate_id()
 
     seed: int = 42

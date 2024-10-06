@@ -13,12 +13,12 @@ config = VoxtralTrainConfig(
     codec_hz=55,
     ## ema
     ema_gamma=16,
-    ema_every=64,
+    ema_every=256,
     ## dataset
     data_path="./data/tokens",
     fake=False,
     overfit=16,
-    batch_size=4,
+    batch_size=8,
     num_workers=20,
     test_size=16,
     ## speed
@@ -30,16 +30,16 @@ config = VoxtralTrainConfig(
     lr_eps=1e-9,
     lr_betas=(0.9, 0.95),
     grad_norm=1.0,
-    warmup_steps=50,
-    max_steps=30_000,
+    warmup_steps=200,
+    max_steps=50_000,
     ## test
-    test_every=100,
-    generate_kwargs={"do_sample": False},
+    test_every=5_000,
+    generate_kwargs={"do_sample": False},  # greedy sampling when testing overfit
     ## logging and checkpointing
     watch_every=None,
     ckpt_path=None,
-    save_every=500,
-    push_every=500,
+    save_every=5_000,
+    push_every=5_000,
     wandb_project_name="voxtral",
 )
 train(config)

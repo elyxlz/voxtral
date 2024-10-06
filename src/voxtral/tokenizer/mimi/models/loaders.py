@@ -11,7 +11,6 @@ from safetensors.torch import load_model
 from ..modules import SEANetDecoder, SEANetEncoder, transformer
 from ..quantization import SplitResidualVectorQuantizer
 from .compression import MimiModel
-from .lm import LMModel
 
 SAMPLE_RATE = 24000
 FRAME_RATE = 12.5

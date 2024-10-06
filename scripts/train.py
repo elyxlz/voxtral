@@ -4,7 +4,7 @@ from voxtral.trainer.trainer import VoxtralTrainConfig, train
 config = VoxtralTrainConfig(
     name="voxtral-train-run",
     seed=42,
-    mistral_pretrained_path="mistralai/Mistral-7B-v0.1",
+    mistral_pretrained_path="mistralai/Mistral-7B-v0.3",
     mistral_kwargs={},
     voxtral_tokenizer_config=VoxtralTokenizerConfig(),
     new_vocab_size=2**16,

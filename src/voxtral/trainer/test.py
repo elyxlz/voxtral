@@ -83,6 +83,21 @@ def log_test_results(
         if generation_audio.ndim == 1:
             generation_audio = generation_audio[np.newaxis, :]
 
+        # Add beep halfway through the audio
+        mid_point = generation_audio.shape[1] // 2
+        beep_duration = int(0.1 * 24000)  # 0.1 seconds at 24kHz
+        beep = np.sin(2 * np.pi * 1000 * np.arange(beep_duration) / 24000).astype(
+            np.float32
+        )
+        generation_audio = np.concatenate(
+            [
+                generation_audio[:, :mid_point],
+                np.tile(beep, (generation_audio.shape[0], 1)),
+                generation_audio[:, mid_point:],
+            ],
+            axis=1,
+        )
+
         # Transpose to (time, channels) as expected by wandb.Audio
         generation_audio = generation_audio.T
 

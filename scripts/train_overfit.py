@@ -33,13 +33,13 @@ config = VoxtralTrainConfig(
     warmup_steps=200,
     max_steps=50_000,
     ## test
-    test_every=5_000,
+    test_every=1_000,
     generate_kwargs={"do_sample": False},  # greedy sampling when testing overfit
     ## logging and checkpointing
     watch_every=None,
     ckpt_path=None,
-    save_every=5_000,
-    push_every=5_000,
+    save_every=1_000,
+    push_every=1_000,
     wandb_project_name="voxtral",
 )
 train(config)

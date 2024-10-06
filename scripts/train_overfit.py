@@ -8,7 +8,7 @@ config = VoxtralTrainConfig(
     mistral_kwargs={},
     voxtral_tokenizer_config=VoxtralTokenizerConfig(),
     new_vocab_size=2**16,
-    lora_rank=64,
+    lora_rank=None,
     prune_layers=2,  # half parameter count
     codec_hz=55,
     ## ema
@@ -18,7 +18,7 @@ config = VoxtralTrainConfig(
     data_path="./data/tokens",
     fake=False,
     overfit=16,
-    batch_size=32,
+    batch_size=4,
     num_workers=20,
     test_size=16,
     ## speed

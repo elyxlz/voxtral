@@ -343,7 +343,7 @@ def train(config: VoxtralTrainConfig) -> None:
             utils.rank_0_only(state.ema.push_to_hub)(
                 f"{config.name}",
                 commit_message=f"step {state.step}, run_id {config.run_id}",
-                private=True,
+                private=False,
             )
 
         if config.test_every and state.step % config.test_every == 0:

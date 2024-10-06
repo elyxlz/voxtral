@@ -53,6 +53,7 @@ class VoxtralDataset(td.IterableDataset):
         self.rank = config.rank
         self.world_size = config.world_size
         self.fake = config.fake
+        self.overfit = config.overfit
 
         if self.fake:
             self.file_paths = []
@@ -84,4 +85,6 @@ class VoxtralDataset(td.IterableDataset):
             if self.fake:
                 yield get_fake_item()
             else:
+                if self.overfit is not None:
+                    idx = idx % self.overfit
                 yield get_item(self.file_paths[idx])

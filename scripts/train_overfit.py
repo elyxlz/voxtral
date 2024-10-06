@@ -25,7 +25,7 @@ config = VoxtralTrainConfig(
     compile=True,
     gradient_checkpointing=True,
     ## opt
-    lr=3e-4,
+    lr=1e-4,
     weight_decay=0.1,
     lr_eps=1e-9,
     lr_betas=(0.9, 0.95),

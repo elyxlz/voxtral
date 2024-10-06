@@ -35,6 +35,7 @@ class VoxtralTrainConfig(BaseConfig):
     mistral_kwargs: dict = {}
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
     new_vocab_size: int = 2**16
+    loss_weights: list[int] = [100, 10, 1]  # text, semantic, acoustic
     lora_rank: int | None = None
     prune_layers: int | None = None  # no layer dropout
     codec_hz: int = 55

@@ -51,6 +51,10 @@ class VoxtralTokenizer(torch.nn.Module):
         self.mimi = loaders.get_mimi(mimi_weight, device="cpu")
         self.mimi.set_num_codebooks(config.mimi_num_quantizers)
 
+        self.text_to_audio_token_factor = int(
+            self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
+        )
+
         # whisper
         self.whisper = TimedWhisperTokenizer(config.whisper_path, hertz=config.text_hz)
 
@@ -85,9 +89,9 @@ class VoxtralTokenizer(torch.nn.Module):
             *audio_tokens.unbind(1), factors=[1] * self.config.mimi_num_quantizers
         )
 
-        # delay text and audio tokens by a window
+        # delay text and audio tokens by two  windows
         # we do this becuase the text is not perfectly 5 hz alligned, so we avoid
-        # corresopnding audio tokens appearing before the text tokens
+        # corresopnding audio tokens appearing before the text tokens by accident
         #
         # we remove the first two window of the audio tokens
         # and the last two windows of the text tokens
@@ -99,11 +103,8 @@ class VoxtralTokenizer(torch.nn.Module):
         text_tokens = text_tokens[..., : -self.config.text_hz * 2]
 
         intermediate_tokens = [text_tokens, interleaved_audio_tokens]
-        text_to_audio_factor = (
-            self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
-        )
         tokens = interleave(
-            *intermediate_tokens, factors=[1, int(text_to_audio_factor)]
+            *intermediate_tokens, factors=[1, int(self.text_to_audio_token_factor)]
         )
 
         return tokens
@@ -111,13 +112,9 @@ class VoxtralTokenizer(torch.nn.Module):
     @torch.no_grad()
     def decode(self, z: torch.Tensor) -> torch.Tensor:
         assert z.dim() == 2
-        # Uninterleave tokens to separate text and audio tokens
-        text_to_audio_factor = int(
-            self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz
-        )
-
+        # uninterleave tokens to separate text and audio tokens
         # throw away text tokens
-        text_tokens, audio_tokens = uninterleave(z, factors=[1, text_to_audio_factor])
+        _, audio_tokens = uninterleave(z, factors=[1, self.text_to_audio_token_factor])
 
         # Discard text tokens and focus on audio tokens
         audio_tokens = audio_tokens - self.config.text_vocab_size
@@ -144,24 +141,6 @@ class VoxtralTokenizer(torch.nn.Module):
             audio_tokens, min=0, max=self.mimi.quantizer.cardinality - 1
         )
         # Decode audio tokens using mimi
-
         decoded_audio = self.mimi.decode(audio_tokens)
 
         return decoded_audio
-
-
-if __name__ == "__main__":
-    # Initialize the VoxtralTokenizer
-    config = VoxtralTokenizerConfig()
-    tokenizer = VoxtralTokenizer(config)
-
-    # Create a dummy audio input tensor
-    dummy_audio = torch.randn(1, 1, 24000)  # Assuming 1 second of audio at 24kHz
-
-    # Encode the audio
-    encoded = tokenizer.encode(dummy_audio, sample_rate=24000)
-    print("Encoded shape:", encoded.shape)
-
-    # Decode the encoded tokens
-    decoded = tokenizer.decode(encoded)
-    print("Decoded shape:", decoded.shape)

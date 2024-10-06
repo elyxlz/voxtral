@@ -8,6 +8,7 @@ config = VoxtralTrainConfig(
     mistral_kwargs={},
     voxtral_tokenizer_config=VoxtralTokenizerConfig(),
     new_vocab_size=2**16,
+    loss_weights=[100, 10, 1],  # text, semantic, acoustic
     lora_rank=None,
     prune_layers=2,  # half parameter count
     codec_hz=55,

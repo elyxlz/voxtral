@@ -1,16 +1,17 @@
-from voxtral.data.indexing import IndexConfig, index_youtube_urls
-
-config = IndexConfig()
-index_youtube_urls(config)
+import subprocess
+import sys
 
 
-from voxtral.data.scraping import ScrapingConfig, scrape_youtube_urls
+def run_script(script_name):
+    print(f"Running {script_name}...")
+    result = subprocess.run([sys.executable, f"scripts/{script_name}"], check=True)
+    print(f"{script_name} completed with return code {result.returncode}")
 
-config = ScrapingConfig()
-scrape_youtube_urls(config)
 
+scripts = ["index.py", "scrape.py", "preprocess.py", "train.py", "serve.py"]
 
-from voxtral.data.preprocessing import PreprocessingConfig, preprocess_audio_chunks
+for script in scripts:
+    run_script(script)
 
-config = PreprocessingConfig()
-preprocess_audio_chunks(config)
+print("All scripts have been executed successfully.")
+

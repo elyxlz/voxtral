@@ -34,7 +34,7 @@ def process_audio(
         waveform = waveform.mean(dim=0, keepdim=True)
 
     # Tokenize the audio
-    tokens = tokenizer.encode(waveform, 24000)
+    tokens = tokenizer.encode(waveform.unsqueeze(0), 24000)
 
     # Generate continuation
     with torch.no_grad():

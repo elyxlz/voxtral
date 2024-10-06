@@ -8,7 +8,8 @@ import transformers as tr
 
 class ServerConfig(BaseSettings):
     share: bool = True
-    voxtral_path: str = "path/to/your/voxtral/model"
+    # voxtral_path: str = "elyx/voxtral-overfit"
+    voxtral_path: str = "nilq/mistral-1L-tiny"
     voxtral_revision: str | None = None
     voxtral_tokenizer_config: VoxtralTokenizerConfig = VoxtralTokenizerConfig()
 

@@ -86,5 +86,5 @@ class VoxtralDataset(td.IterableDataset):
                 yield get_fake_item()
             else:
                 if self.overfit is not None:
-                    idx = len(self) - (idx % self.overfit)
+                    idx = (idx % self.overfit) * 1_000
                 yield get_item(self.file_paths[idx])

@@ -6,15 +6,7 @@ My submission for the A16z x Cerebral Valley Mistral London Hackathon
 
 ## About
 
-This repo is a full stack pipeline to convert a mistral model into an end2end SpeechLM (like GPT4o voice mode or Moshi).
-
-SpeechLMs (audio in and audio out) are the missing ingredient to truly human like conversational agents.
-
-The main reason is because they don't have the information bottleneck typical speech systems have (audio -> text -> audio) where all prosody, rhythm, tone, and emotional information is lost in the ASR process and has to hallucinated in the TTS stage. Furthermore, speechLMs can learn how to handle interruptions and silence directly from the data without special and unreliable hacks.
-
-Only two working speechLMs have every been produced publicly: GPT4o and Moshi. Gpt4o is closed source and has been safety tuned and synthetically post-trained to oblivion. Moshi IMO has too complicated of an architecture (for very little gain) and has also been trained with too much synthetic data, that leaves it still feeling robotic (defeating the entire point of SpeechLMs!)
-
-This repo provides the infrastructure for anyone with modest gpu capacity to create their own successful speechLM.
+Voxtral: Convert Mistral into a end2end SpeechLM. No information bottleneck, preserves prosody, learns interruptions from data. Unlike GPT4o (closed) or Moshi (complex), it's open, simple, natural.
 
 ## Tech Stack
 

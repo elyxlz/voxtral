@@ -110,6 +110,7 @@ class VoxtralTokenizer(torch.nn.Module):
 
     @torch.no_grad()
     def decode(self, z: torch.Tensor) -> torch.Tensor:
+        assert z.dim() == 2
         # Uninterleave tokens to separate text and audio tokens
         text_to_audio_factor = int(
             self.mimi.frame_rate * self.config.mimi_num_quantizers / self.config.text_hz

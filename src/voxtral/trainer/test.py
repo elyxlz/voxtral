@@ -54,7 +54,7 @@ def test(ema_model: Voxtral, step: int, config: VoxtralTrainConfig) -> None:
         # Decode the entire sequence
         decoded_generation = tokenizer.decode(generated)
 
-        generations.append(decoded_generation)
+        generations.extend(decoded_generation.unbind())
 
     log_test_results(generations, step)
 

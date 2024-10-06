@@ -2072,7 +2072,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "einops", specifier = ">=0.8.0" },
-    { name = "gradio" },
+    { name = "gradio", specifier = ">=3.36.1" },
     { name = "huggingface-hub", specifier = ">=0.25.1" },
     { name = "numpy", specifier = ">=2.1.1" },
     { name = "peft", specifier = ">=0.13.0" },

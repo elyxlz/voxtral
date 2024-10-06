@@ -68,7 +68,7 @@ def log_test_results(
     generations: list[torch.Tensor],
     step: int,
 ) -> None:
-    print("Logging audio...")
+    print("\nlogging audio...")
     table = wandb.Table(columns=["Generated"])
 
     for generation in generations:

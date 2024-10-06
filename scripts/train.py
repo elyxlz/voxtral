@@ -1,5 +1,5 @@
-from voxtral.trainer.trainer import VoxtralTrainConfig, train
 from voxtral.tokenizer.model import VoxtralTokenizerConfig
+from voxtral.trainer.trainer import VoxtralTrainConfig, train
 
 config = VoxtralTrainConfig(
     name="voxtral-train-run",
